@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#818cf8"/>
+      <stop offset="1" stop-color="#4f46e5"/>
+    </linearGradient>
+  </defs>
+  <!-- tile -->
+  <rect width="64" height="64" rx="14" fill="url(#g)"/>
+  <!-- resume page with folded corner -->
+  <path d="M19 12h19l9 9v31a2 2 0 0 1-2 2H19a2 2 0 0 1-2-2V14a2 2 0 0 1 2-2z" fill="#ffffff"/>
+  <path d="M38 12v7a2 2 0 0 0 2 2h7z" fill="#c7d2fe"/>
+  <!-- name + text lines -->
+  <rect x="22" y="19" width="12" height="3.5" rx="1.75" fill="#4f46e5"/>
+  <rect x="22" y="28" width="20" height="2.5" rx="1.25" fill="#a5b4fc"/>
+  <rect x="22" y="34" width="20" height="2.5" rx="1.25" fill="#a5b4fc"/>
+  <rect x="22" y="40" width="14" height="2.5" rx="1.25" fill="#a5b4fc"/>
+  <!-- tailor's stitch line around the page -->
+  <path d="M13 17v37a4 4 0 0 0 4 4h28" fill="none" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" stroke-dasharray="3.5 3"/>
+</svg>
