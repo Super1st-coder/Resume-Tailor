@@ -1,0 +1,112 @@
+# MARCIN PHAM
+
++48 732059736 | marcin.tech@zohomail.com | Rzeszów, Poland | linkedin.com/in/marcin-pham-ba389b410/
+
+## PROFESSIONAL SUMMARY
+
+Senior AI Full Stack Engineer with 10+ years of experience designing, developing, and deploying scalable SaaS platforms, cloud-native applications, enterprise software, and AI-powered solutions. Proven expertise in Python, FastAPI, Django, React, TypeScript, PostgreSQL, AWS, GCP, Kubernetes, and modern microservices architectures. Strong background building high-performance APIs, workflow automation platforms, distributed systems, real-time communication applications, and AI-enabled products. Experienced leading engineering teams, architecting scalable backend infrastructure, implementing DevOps best practices, and delivering production-grade software from concept through deployment. Skilled in integrating LLMs, Retrieval-Augmented Generation (RAG), semantic search, intelligent automation, and machine learning capabilities into business-critical applications.
+
+## PROFESSIONAL EXPERIENCE
+
+### Lead AI Full Stack Engineer | Jan 2024 - Jul 2026
+*Devs Data LLC** | Remote / Warsaw, Poland
+
+- Led the architecture, development, and deployment of enterprise-grade SaaS platforms, cloud-native applications, workflow automation systems, and AI-powered business solutions using Python, FastAPI, Django, React, and TypeScript.
+- Designed scalable microservices architectures supporting business automation, analytics platforms, customer engagement systems, and intelligent enterprise applications.
+- Built high-performance REST APIs, GraphQL services, authentication platforms, RBAC frameworks, and multi-tenant backend systems serving both internal and customer-facing applications.
+- Developed asynchronous backend services using FastAPI, Celery, Redis, and event-driven architectures, significantly improving throughput, scalability, and application responsiveness.
+- Engineered modern React and TypeScript front-end applications with reusable component libraries, responsive user experiences, real-time dashboards, and seamless API integrations.
+- Architected PostgreSQL database systems, optimized query performance, indexing strategies, caching layers, and data models supporting high-volume transactional workloads.
+- Designed and implemented workflow automation platforms integrating CRMs, payment gateways, third-party APIs, and enterprise business process management systems.
+- Built scalable SaaS products supporting tenant isolation, subscription management, role-based access control, user provisioning, and enterprise-grade security requirements.
+- Implemented cloud-native deployment strategies using Docker, Kubernetes, AWS, and GCP.
+- Automated infrastructure provisioning and application deployment workflows using Terraform, GitHub Actions, CI/CD pipelines, and Infrastructure-as-Code practices.
+- Developed secure authentication and authorization frameworks utilizing JWT, OAuth2, RBAC, SSO integrations, and modern security best practices.
+- Built monitoring and observability platforms using centralized logging, metrics collection, performance monitoring, and automated alerting systems.
+- Developed real-time communication systems leveraging WebSockets, event streaming, notifications, and voice-enabled integrations.
+- Engineered ETL and data processing pipelines supporting operational intelligence, analytics reporting, business automation, and workflow orchestration.
+- Integrated AI-powered capabilities including LLM workflows, Retrieval-Augmented Generation (RAG), semantic search, recommendation systems, and intelligent automation features into production applications.
+- Developed vector search and retrieval solutions enabling contextual search, knowledge discovery, and AI-enhanced user experiences.
+- Optimized backend services and database workloads, reducing API response times by more than 40% while improving scalability and reliability.
+- Established engineering standards, architecture governance, code review processes, and development best practices across software engineering teams.
+- Led architecture planning, technical design reviews, sprint execution, release management, and production deployment initiatives.
+- Collaborated closely with executives, product managers, designers, and stakeholders to translate business requirements into scalable technical solutions.
+- Delivered multiple enterprise software products from initial architecture and development through production launch, scaling, and ongoing support.
+
+### Senior Software Engineer | Jul 2020 - Oct 2023
+**7N ** | Gdańsk, Poland
+
+- Designed and developed enterprise web applications using Python, Django, Django REST Framework, PostgreSQL, and modern front-end technologies.
+- Built large-scale automation platforms utilizing Selenium, BeautifulSoup, Scrapy, and Python to automate business operations and large-scale data collection workflows.
+- Developed secure REST APIs supporting business-critical processes, reporting systems, customer-facing applications, and third-party integrations.
+- Architected scalable backend services emphasizing maintainability, performance optimization, fault tolerance, and long-term extensibility.
+- Built comprehensive workflow and project management platforms supporting role-based access control, notifications, approvals, and reporting capabilities.
+- Developed custom e-commerce solutions supporting inventory management, pricing optimization, order processing, and payment gateway integrations.
+- Implemented database optimization initiatives including indexing, query tuning, caching strategies, and schema redesign to improve performance.
+- Designed asynchronous processing frameworks using Celery and Redis to support background jobs and high-volume workloads.
+- Participated in architecture reviews, engineering planning, technical leadership initiatives, and software development best practices.
+
+### Software Engineer | Mar 2018 - Apr 2020
+**Merixstudio** | Poznań, Poland
+
+- Developed healthcare-focused web applications and backend services supporting operational workflows, reporting systems, and business analytics initiatives.
+- Built secure data processing platforms and reporting solutions utilized by internal business teams and healthcare stakeholders.
+- Developed REST APIs, backend modules, and service integrations supporting enterprise healthcare applications.
+- Implemented data validation, business reporting, analytics workflows, and operational dashboards using Python and SQL.
+- Participated in A/B testing initiatives, performance optimization efforts, and software enhancement projects.
+- Collaborated with cross-functional teams to deliver scalable, maintainable, and compliant software solutions within regulated healthcare environments.
+- Contributed to system modernization initiatives, software architecture improvements, and backend platform enhancements.
+
+## PROJECTS
+
+### Brivano.io – Real Estate Intelligence Platform
+**Devs Data LLC** | Remote / Warsaw, Poland
+
+- Built a large-scale property intelligence platform automating data collection, normalization, enrichment, and analytics across multiple real estate data sources.
+- Developed scalable web scraping pipelines, backend APIs, and business intelligence services supporting lead generation, property discovery, and market analytics.
+- Implemented entity resolution, data enrichment, and intelligent filtering systems to improve data quality, accuracy, and usability.
+
+### Fieldcall.ai – AI Voice Automation Platform
+**Devs Data LLC** | Remote / Warsaw, Poland
+
+- Developed backend infrastructure supporting real-time voice interactions, intelligent call routing, workflow automation, and CRM integrations.
+- Built scalable APIs and processing services enabling automated customer communication workflows and voice-enabled business operations.
+- Implemented AI-powered automation workflows leveraging speech processing, business rules engines, and intelligent routing capabilities.
+
+## TECHNICAL SKILLS
+
+**Programming Languages:** Python, TypeScript, JavaScript, Java, SQL, Bash
+
+**Frameworks:** Node.js, Spring Boot, Django, FastAPI, Flask, Celery, GraphQL
+
+**Frontend:** React, Next.js, HTML, CSS, Tailwind
+
+**AI/ML:** LLMs, RAG, Semantic Search, Vector Databases, LangChain, OpenAI APIs, NLP
+
+**Backend:** REST APIs, GraphQL, Microservices, Event-Driven Architecture, WebSockets
+
+**Databases:** PostgreSQL, MySQL, MongoDB, Redis, Redshift
+
+**Cloud/DevOps:** AWS, Azure, Docker, Kubernetes, Terraform, CI/CD, GitHub Actions
+
+**Data Engineering:** ETL, Data Modeling, Pandas, NumPy
+
+**Security:** OAuth2, JWT, SSO, RBAC, SOC 2, GDPR
+
+**Testing:** Jest, PyTest, Cypress, TDD
+
+**Monitoring:** CloudWatch, ELK Stack
+
+**Methodologies:** Agile, Scrum, Kanban, Code Reviews
+
+**Core Strengths:** Full Stack Development, Cloud-Native Architecture, AI/LLM Integration, Microservices & Distributed Systems, API Design & System Scaling, DevOps & CI/CD Automation, Technical Leadership & Mentoring
+
+## EDUCATION
+
+**University of Rzeszow** | 2013 – 2016
+Bachelor’s Degree, Computer Science/Informatics
+
+## LANGUAGES
+
+- Poland — C2
+- English — C1

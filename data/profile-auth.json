@@ -1,0 +1,26 @@
+{
+  "wellington": {
+    "user": "Wellington",
+    "salt": "5d0a41bf83c61cae3afd7d5fec2fdd93",
+    "hash": "4dd8ab53e64d90ff784622212aa6e6bd9838bad81560bc3da91e1f05edf352dc",
+    "updated": "2026-11-16T06:54:13.133Z"
+  },
+  "smaylle": {
+    "user": "Smaylle",
+    "salt": "e7fabde0aa02ed5bed44c7b623901204",
+    "hash": "c81d262f34416cce7eaa614920d80bc9c5a49c48fba064afc71ad82176c24325",
+    "updated": "2026-11-16T06:54:14.555Z"
+  },
+  "marcin_pham": {
+    "user": "Marcin",
+    "salt": "d1e7940110cf280c4f12b0f18f95e8b0",
+    "hash": "c141edbd385ed3c42cac35abd619a77c762cadca8e59f60b3fa3af234703ee0b",
+    "updated": "2026-11-16T06:54:16.220Z"
+  },
+  "kamil_toporek": {
+    "user": "Kamil",
+    "salt": "0ca330823a66796a71f28307c1519dfb",
+    "hash": "ba18566f8f4ffe5e8667b04d53c1ae1aaf7a39834d1ad606763813d23d16e335",
+    "updated": "2026-11-16T07:04:36.855Z"
+  }
+}
