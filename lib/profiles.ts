@@ -66,7 +66,10 @@ export async function writeResume(id: string, markdown: string, create: boolean)
   const taken = (await exists(file)) || (await exists(fileFor(id, true)));
   if (create && taken) throw new Error(`A profile named "${id}" already exists`);
   if (!create && !(await exists(file))) throw new Error("Profile not found");
-  const tmp = path.join(path.dirname(path.dirname(file)), `.${id}.${process.pid}.tmp`);
+  // Temp file in the same folder as the resume: rename() only works within one file system,
+  // and in Docker resumes/ is a separate mount from the rest of the app (EXDEV otherwise).
+  // Profiles are listed from *.md files only, so the .tmp file is never seen as a profile.
+  const tmp = path.join(path.dirname(file), `.${id}.${process.pid}.tmp`);
   await fs.writeFile(tmp, markdown.replace(/\r\n/g, "\n").trimEnd() + "\n", "utf8");
   await fs.rename(tmp, file);
 }
