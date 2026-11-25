@@ -1710,6 +1710,8 @@ export default function Home() {
   // "Fill from job link": the server reads the posting and fills company, role and JD.
   const [jobLink, setJobLink] = useState("");
   const [filling, setFilling] = useState(false);
+  // Set when Fill found company, role and job description: generate as soon as the fields are updated.
+  const [autoGenerate, setAutoGenerate] = useState(false);
   const [fillMsg, setFillMsg] = useState<{ ok: boolean; text: string } | null>(null);
   const [blockedLink, setBlockedLink] = useState("");
   const [templateId, setTemplateId] = useState<string>(RESUME_TEMPLATES[0].id);
@@ -1994,8 +1996,8 @@ export default function Home() {
     }
   }
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
+  async function handleSubmit(e?: React.FormEvent) {
+    e?.preventDefault();
 
     setError(null);
     setLastResponse(null);
@@ -2232,17 +2234,31 @@ export default function Home() {
       if (data.company) setCompany(data.company); else missing.push("company name");
       if (data.role) setRole(data.role); else missing.push("job role");
       if (data.jobDescription) setJobDescription(data.jobDescription); else missing.push("job description");
-      setFillMsg(
-        missing.length
-          ? { ok: false, text: `Filled what was found. Not found: ${missing.join(", ")}. Please type it in.` }
-          : { ok: true, text: "Filled. Check the fields before generating." }
-      );
+      if (missing.length) {
+        setFillMsg({
+          ok: false,
+          text: `Filled what was found. Not found: ${missing.join(", ")}. Please type it in and click Generate.`,
+        });
+      } else {
+        // Everything was found: generate the resume right away (see the effect below).
+        setFillMsg({ ok: true, text: "Filled. Generating the resume…" });
+        setAutoGenerate(true);
+      }
     } catch {
       setFillMsg({ ok: false, text: "Could not reach the server. Try again." });
     } finally {
       setFilling(false);
     }
   }
+
+  // Runs after a successful Fill, once React has applied the filled-in company, role and
+  // job description, so handleSubmit sees the new values.
+  useEffect(() => {
+    if (!autoGenerate || filling || loading) return;
+    setAutoGenerate(false);
+    if (company.trim() && role.trim() && jobDescription.trim()) void handleSubmit();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoGenerate, filling, loading, company, role, jobDescription]);
 
   return (
     <main
