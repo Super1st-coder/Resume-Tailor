@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { isAdmin } from "@/lib/admin-auth";
+import { forbidden, isSuperAdmin } from "@/lib/admin-auth";
 import { pdfToText, resumeTextToMarkdown } from "@/lib/resume-convert";
 import { activeIds, archivedIds, displayName, idFromName } from "@/lib/profiles";
 
@@ -13,7 +13,7 @@ const MAX_BYTES = 10 * 1024 * 1024;
  * resume): returns the profile Markdown for review, plus a suggested id.
  */
 export async function POST(request: NextRequest) {
-  if (!isAdmin(request)) return NextResponse.json({ error: "Wrong admin password" }, { status: 401 });
+  if (!isSuperAdmin(request)) return forbidden(request);
   try {
     const form = await request.formData();
     const file = form.get("file");

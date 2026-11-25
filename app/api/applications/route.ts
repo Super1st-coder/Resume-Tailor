@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { isAdmin } from "@/lib/admin-auth";
+import { adminRole, forbidden, isSuperAdmin } from "@/lib/admin-auth";
 import { promises as fs } from "fs";
 import path from "path";
 import { importApplications, listApplications } from "@/lib/applications";
@@ -11,20 +11,24 @@ const unauthorized = () => NextResponse.json({ error: "Wrong admin password" }, 
 
 /** GET (admin): every application, newest first. */
 export async function GET(request: NextRequest) {
-  if (!isAdmin(request)) return unauthorized();
-  const applications = await listApplications();
-  return NextResponse.json({ applications });
+  const role = adminRole(request);
+  if (!role) return unauthorized();
+  const all = await listApplications();
+  // General admins only see counts: send time + profile, no company/role/file/IP.
+  const applications =
+    role === "super" ? all : all.map((a) => ({ id: a.id, time: a.time, profile: a.profile, company: "", role: "", filename: "", ip: "" }));
+  return NextResponse.json({ applications, role });
 }
 
 // Applications are recorded by /api/chat when a resume is generated.
 // There is deliberately no delete: the history is kept forever.
 
 /**
- * PUT (admin): import past applications from resume file names.
+ * PUT (super admin): import past applications from resume file names.
  * Body: { profile, items: [{ company, role, filename, time }] }. Add-only.
  */
 export async function PUT(request: NextRequest) {
-  if (!isAdmin(request)) return unauthorized();
+  if (!isSuperAdmin(request)) return forbidden(request);
   let body: { profile?: unknown; items?: unknown };
   try {
     body = await request.json();

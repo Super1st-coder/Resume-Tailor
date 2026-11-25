@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { isAdmin } from "@/lib/admin-auth";
+import { forbidden, isSuperAdmin } from "@/lib/admin-auth";
 import { setArchived } from "@/lib/profiles";
 
 export const dynamic = "force-dynamic";
@@ -9,7 +9,7 @@ export const dynamic = "force-dynamic";
  * the resume, login and application history are kept) or restore it.
  */
 export async function POST(request: NextRequest) {
-  if (!isAdmin(request)) return NextResponse.json({ error: "Wrong admin password" }, { status: 401 });
+  if (!isSuperAdmin(request)) return forbidden(request);
   let body: { profile?: unknown; archived?: unknown };
   try {
     body = await request.json();

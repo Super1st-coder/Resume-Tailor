@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { button, card, ghost, input, num, td, th } from "./styles";
 import ProfilesPanel, { type AdminProfile } from "./ProfilesPanel";
+import BarChart, { buildSeries, type Period } from "./BarChart";
 
 type Application = {
   id: string;
@@ -43,6 +44,9 @@ function parseResumeFile(file: File, profileName: string): ImportItem | null {
 const KEY_STORAGE = "resume-tailor-admin-key";
 const DAYS_SHOWN = 14;
 const WEEKS_SHOWN = 8;
+const MONTHS_SHOWN = 12;
+type ChartMode = "day" | "week" | "month";
+const monthKey = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
 
 // ---- dates (browser's local time; weeks start on Monday) ----
 function startOfDay(d: Date): Date {
@@ -89,6 +93,18 @@ export default function AdminPage() {
   const [key, setKey] = useState("");
   const [keyInput, setKeyInput] = useState("");
   const [apps, setApps] = useState<Application[] | null>(null);
+  // "super": full access; "admin": view counts/history and export only.
+  const [role, setRole] = useState<"super" | "admin">("admin");
+  const [chartMode, setChartMode] = useState<ChartMode>("day");
+  // Profiles hidden in the chart by clicking their legend entry.
+  const [hiddenSeries, setHiddenSeries] = useState<Set<string>>(new Set());
+  const toggleSeries = (id: string) =>
+    setHiddenSeries((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -117,6 +133,7 @@ export default function AdminPage() {
       }
       if (!res.ok) throw new Error(data?.error || `Request failed (${res.status})`);
       setApps(data.applications ?? []);
+      setRole(data.role === "super" ? "super" : "admin");
       writeKey(k);
       setKey(k);
       const pr = await fetch("/api/admin/profiles", { headers: { "x-admin-key": k }, cache: "no-store" });
@@ -179,6 +196,49 @@ export default function AdminPage() {
     }
     return { per, all, days, weeks, blank };
   }, [apps]);
+
+  /** Bars for the chart: oldest period on the left. */
+  const chart = useMemo(() => {
+    const { series, seriesOf } = buildSeries(allProfiles);
+    const now = new Date();
+    let periods: Period[] = [];
+    let keyOf: (t: Date) => string;
+    if (chartMode === "day") {
+      const today = startOfDay(now);
+      periods = Array.from({ length: DAYS_SHOWN }, (_, i) => addDays(today, i - DAYS_SHOWN + 1)).map((d) => ({
+        key: dayKey(d),
+        label: fmtShort(d),
+        tip: fmtDay(d),
+        counts: {},
+      }));
+      keyOf = (t) => dayKey(startOfDay(t));
+    } else if (chartMode === "week") {
+      const week = startOfWeek(now);
+      periods = Array.from({ length: WEEKS_SHOWN }, (_, i) => addDays(week, -7 * (WEEKS_SHOWN - 1 - i))).map((w) => ({
+        key: dayKey(w),
+        label: fmtShort(w),
+        tip: `${fmtShort(w)} – ${fmtShort(addDays(w, 6))}`,
+        counts: {},
+      }));
+      keyOf = (t) => dayKey(startOfWeek(t));
+    } else {
+      periods = Array.from({ length: MONTHS_SHOWN }, (_, i) => new Date(now.getFullYear(), now.getMonth() - (MONTHS_SHOWN - 1 - i), 1)).map((m) => ({
+        key: monthKey(m),
+        label: m.toLocaleDateString(undefined, { month: "short", ...(m.getMonth() === 0 ? { year: "2-digit" } : {}) }),
+        tip: m.toLocaleDateString(undefined, { month: "long", year: "numeric" }),
+        counts: {},
+      }));
+      keyOf = monthKey;
+    }
+    const byKey = new Map(periods.map((p) => [p.key, p]));
+    for (const a of apps ?? []) {
+      const p = byKey.get(keyOf(new Date(a.time)));
+      if (!p) continue;
+      const s = seriesOf(a.profile);
+      p.counts[s] = (p.counts[s] ?? 0) + 1;
+    }
+    return { series, periods };
+  }, [apps, allProfiles, chartMode]);
 
   const filtered = useMemo(() => {
     const q = filterText.trim().toLowerCase();
@@ -315,48 +375,92 @@ export default function AdminPage() {
         ))}
       </div>
 
-      {/* Per profile summary */}
+      {/* Bar chart: daily / weekly / monthly, stacked by profile (all admins) */}
       <section style={card}>
-        <h2 style={{ fontSize: "1.1rem", marginBottom: "0.75rem" }}>Per profile</h2>
-        <div style={{ overflowX: "auto" }}>
-          <table style={{ borderCollapse: "collapse", width: "100%" }}>
-            <thead>
-              <tr>
-                <th style={th}>Profile</th>
-                <th style={{ ...th, textAlign: "right" }}>Today</th>
-                <th style={{ ...th, textAlign: "right" }}>Yesterday</th>
-                <th style={{ ...th, textAlign: "right" }}>This week</th>
-                <th style={{ ...th, textAlign: "right" }}>Last week</th>
-                <th style={{ ...th, textAlign: "right" }}>All time</th>
-              </tr>
-            </thead>
-            <tbody>
-              {allProfiles.map((p) => {
-                const r = row(p.id);
-                return (
-                  <tr key={p.id}>
-                    <td style={{ ...td, fontWeight: 600 }}>{p.name}</td>
-                    <td style={{ ...num, fontWeight: 700 }}>{r.today}</td>
-                    <td style={num}>{r.yesterday}</td>
-                    <td style={{ ...num, fontWeight: 700 }}>{r.week}</td>
-                    <td style={num}>{r.lastWeek}</td>
-                    <td style={num}>{r.total}</td>
-                  </tr>
-                );
-              })}
-              <tr>
-                <td style={{ ...td, color: "var(--muted)" }}>Total</td>
-                <td style={num}>{all.today}</td>
-                <td style={num}>{all.yesterday}</td>
-                <td style={num}>{all.week}</td>
-                <td style={num}>{all.lastWeek}</td>
-                <td style={num}>{all.total}</td>
-              </tr>
-            </tbody>
-          </table>
+        <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", flexWrap: "wrap", marginBottom: "0.75rem" }}>
+          <h2 style={{ fontSize: "1.1rem", flex: 1 }}>
+            Applications per {chartMode === "day" ? "day" : chartMode === "week" ? "week" : "month"}
+            <span style={{ color: "var(--muted)", fontSize: "0.85rem", fontWeight: 400, marginLeft: "0.5rem" }}>
+              {chartMode === "day" ? `last ${DAYS_SHOWN} days` : chartMode === "week" ? `last ${WEEKS_SHOWN} weeks (Mon–Sun)` : `last ${MONTHS_SHOWN} months`}
+            </span>
+          </h2>
+          <div role="tablist" style={{ display: "inline-flex", border: "1px solid #3a3a44", borderRadius: 8, overflow: "hidden" }}>
+            {([["day", "Daily"], ["week", "Weekly"], ["month", "Monthly"]] as const).map(([m, label]) => (
+              <button
+                key={m}
+                role="tab"
+                aria-selected={chartMode === m}
+                onClick={() => setChartMode(m)}
+                style={{
+                  padding: "0.35rem 0.85rem",
+                  fontSize: "0.85rem",
+                  border: "none",
+                  cursor: "pointer",
+                  background: chartMode === m ? "#3a3a44" : "transparent",
+                  color: chartMode === m ? "var(--text)" : "var(--muted)",
+                  fontWeight: chartMode === m ? 600 : 400,
+                }}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
         </div>
+        {/* legend: click a profile to hide / show it in the chart */}
+        <div style={{ display: "flex", flexWrap: "wrap", gap: "0.25rem 0.5rem", marginBottom: "0.5rem", fontSize: "0.85rem" }}>
+          {chart.series.map((s) => {
+            const off = hiddenSeries.has(s.id);
+            return (
+              <button
+                key={s.id}
+                type="button"
+                aria-pressed={!off}
+                title={off ? `Show ${s.name}` : `Hide ${s.name}`}
+                onClick={() => toggleSeries(s.id)}
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 6,
+                  padding: "0.2rem 0.45rem",
+                  border: "none",
+                  borderRadius: 6,
+                  background: "transparent",
+                  cursor: "pointer",
+                  fontSize: "inherit",
+                  color: off ? "#5c5c66" : "var(--muted)",
+                  textDecoration: off ? "line-through" : "none",
+                }}
+              >
+                <span
+                  style={{
+                    width: 10,
+                    height: 10,
+                    borderRadius: 2,
+                    boxSizing: "border-box",
+                    background: off ? "transparent" : s.color,
+                    border: `2px solid ${s.color}`,
+                    opacity: off ? 0.6 : 1,
+                  }}
+                />
+                {s.name}
+              </button>
+            );
+          })}
+          {hiddenSeries.size > 0 && (
+            <button
+              type="button"
+              onClick={() => setHiddenSeries(new Set())}
+              style={{ border: "none", background: "transparent", color: "var(--muted)", cursor: "pointer", fontSize: "inherit", textDecoration: "underline" }}
+            >
+              Show all
+            </button>
+          )}
+        </div>
+        <BarChart periods={chart.periods} series={chart.series.filter((s) => !hiddenSeries.has(s.id))} />
       </section>
 
+      {/* Everything below is super admin only; general admins see the tiles, per-profile table and chart. */}
+      {role === "super" && <>
       {/* Daily */}
       <section style={card}>
         <h2 style={{ fontSize: "1.1rem", marginBottom: "0.75rem" }}>Every day (last {DAYS_SHOWN} days)</h2>
@@ -429,10 +533,10 @@ export default function AdminPage() {
       </section>
 
       {/* Profiles: add from PDF, edit resume, login, archive */}
-      <ProfilesPanel adminKey={key} profiles={profiles} reload={() => load(key)} />
+      {role === "super" && <ProfilesPanel adminKey={key} profiles={profiles} reload={() => load(key)} />}
 
-      {/* Import past resumes */}
-      <section style={card}>
+      {/* Import past resumes (super admin only) */}
+      {role === "super" && <section style={card}>
         <h2 style={{ fontSize: "1.1rem", marginBottom: "0.25rem" }}>Import past resumes</h2>
         <p style={{ color: "var(--muted)", fontSize: "0.9rem", marginBottom: "0.75rem" }}>
           For resumes made before counting started. Choose the profile, then select the resume PDF files
@@ -494,7 +598,7 @@ export default function AdminPage() {
             </table>
           </div>
         )}
-      </section>
+      </section>}
 
       {/* All applications */}
       <section style={card}>
@@ -550,6 +654,7 @@ export default function AdminPage() {
           </div>
         )}
       </section>
+      </>}
     </main>
   );
 }

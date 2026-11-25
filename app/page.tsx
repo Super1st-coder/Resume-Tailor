@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   Document,
   Packer,
@@ -20,6 +20,7 @@ import {
   contactIconPng,
   contactIconSvg,
 } from "@/lib/contact-icons";
+import { BulletRuleFixer } from "@/lib/bullet-rules";
 import {
   canPickFolder,
   downloadFile,
@@ -1276,7 +1277,13 @@ The goal is to achieve 99–100% JD skill coverage and ATS alignment.
 - Do not include a Projects section.
 - Company names in work experience as ### **Company Name**
 - Markdown only; no comments outside content.
-- No bold/italics for skills in bullets; no quotes, symbols, or commas before "and", "where", "which".
+- No italics; no quotes, symbols, or commas before "and", "where", "which".
+- BOLD TECHNICAL KEYWORDS (required): first analyze the JD and list its technical keywords: languages, frameworks, libraries, tools, platforms, cloud services, databases, protocols, standards/compliance and technical methodologies (e.g. Python, React, AWS Lambda, PostgreSQL, Kubernetes, REST APIs, CI/CD, RAG, HIPAA).
+  - In EVERY work-experience bullet, wrap each of those technical keywords in Markdown bold: **Python**, **AWS Lambda**, **CI/CD**. Also bold the other concrete technologies you mention in bullets.
+  - In the Summary, bold the JD's field/technical keywords it mentions (e.g. **AI**, **Automation**, **Full Stack**, **Cloud**); the Summary still follows its own rules below.
+  - Bold only the technology term itself (1-3 words), never a whole phrase or sentence. Do not bold verbs, soft skills, company names, job titles, dates or numbers.
+  - Every work-experience bullet should contain at least 2 bold technical keywords (most will have 2-5).
+  - In the Skills section keep the format given below (bold category label only).
 - Avoid letter like "-"
 
 2. Name
@@ -1305,7 +1312,7 @@ Devs Data LLC (last company)
 - Remove bullets that are quite different with JD's requirement of JD.
 - Avoid JD mirroring: never copy sentences directly from the job description. Instead, rephrase concepts and combine them with real engineering context
 - keep expression of orignal resume especially verbs but update it with JD's skills 
-- 8-10 bullets. Bullet lengths should vary (some 30-40 words, some 20-30 words, some 8-12 words). The 2-3 line rule does NOT apply to this role.
+- 10-12 bullets: 60% one-line bullets and 40% two-line bullets (see "Bullet rules" below).
 - Use as many JD hard skills + healthcare + fintech context (or main JD domain) as possible.
 - Never keep the same order between resume bullets and JD's responsbilites
 - Seperate responsbily of JD and rewrite in several bullets if JD's responsbility includes several exp.
@@ -1319,24 +1326,31 @@ Devs Data LLC (last company)
 - Include the location of companies.
 
 7N (second company)
-- 6-8 bullets. Every bullet must be 2-3 printed lines long: 30-45 words (about 200-300 characters). No short one-line bullets and nothing longer than 3 lines.
+- 7-9 bullets: 40% one-line bullets and 60% two-line bullets (see "Bullet rules" below).
 - Entry-level style, 10% JD skills incorporated.
 - No advanced skills, leadership, or mentoring.
 - Mention industry and domain and skills that were not mentioned above work exp (Gspec Technologies) so that the resume include all skills and experience in all domain and industry,
 
 Merixstudio (first company)
-- 4-5 bullets. Every bullet must be 2-3 printed lines long: 30-45 words (about 200-300 characters). No short one-line bullets and nothing longer than 3 lines.
+- 7-9 bullets: 30% one-line bullets and 70% two-line bullets (see "Bullet rules" below).
 - Entry-level style, 10% JD skills incorporated.
 - No advanced skills, leadership, or mentoring.
 - Mention industry and domain and skills that were not mentioned above work exp (PCS Research Group LLC) so that the resume include all skills and experience in all domain and industry,
 
-Bullet count by role (count only work-experience roles, not projects). This applies to every resume and overrides any other bullet count:
-  - Most recent role: 8-10 bullets.
-  - The role before it (second most recent): 6-8 bullets.
-  - Every older role: 4-5 bullets each.
-  - Most recent role: bullet lengths vary (some long, some medium, some short).
-  - Every other role: every bullet must be 2-3 printed lines: 30-45 words (about 200-300 characters). Never shorter than 2 lines or longer than 3 lines.
-  - Keep the bullets detailed: concrete technologies, what was built, how, and the business/technical outcome.
+Bullet rules (count only work-experience roles, in the order they appear, not projects). This applies to every resume and overrides any other bullet count or length:
+  - A one-line bullet fills exactly ONE printed line: 12-15 words (about 80-100 characters).
+  - A two-line bullet fills exactly TWO printed lines: 25-32 words (about 160-200 characters).
+  - No bullet may be longer than 2 printed lines.
+  - 1st role (most recent): MORE than 9 bullets (10-12). 60% one-line, 40% two-line.
+    10 bullets = 6 one-line + 4 two-line; 11 = 7 + 4; 12 = 7 + 5.
+  - 2nd role: MORE than 6 bullets (7-9). 40% one-line, 60% two-line.
+    7 bullets = 3 one-line + 4 two-line; 8 = 3 + 5; 9 = 4 + 5.
+  - 3rd role: MORE than 6 bullets (7-9). 30% one-line, 70% two-line.
+    7 bullets = 2 one-line + 5 two-line; 8 = 2 + 6; 9 = 3 + 6.
+  - Every older role (4th and later): 4-5 bullets, all two-line.
+  - Mix one-line and two-line bullets within a role; don't put all the short ones together.
+  - Before writing, plan each role's bullets (count and which are one-line or two-line), then check the counts after writing.
+  - Keep the bullets concrete: technologies, what was built, how, and the business/technical outcome.
 
 5. Skill Section (## Technical Skills)
 - First, analyze the JD in detail and extract EVERY hard skill, language, framework, tool, platform, cloud service, database, standard and methodology it mentions (requirements, responsibilities, preferred/nice-to-have, tech stack). Do not miss even one.
@@ -1464,6 +1478,66 @@ function headerOf(md: string): string {
 }
 
 /**
+ * Make sure technical words are bold in the Summary and Experience sections.
+ * The AI is asked to bold them, but it misses some. Known technical terms are:
+ *  - every skill listed in the Skills section (except "Core Strengths" phrases), and
+ *  - every term the AI already bolded somewhere (if it looks technical).
+ * Each plain (not yet bold) occurrence of such a term is wrapped in **...**.
+ * Headings, links, italics (dates) and text that's already bold are left alone.
+ */
+function boldTechTerms(md: string): string {
+  const lines = md.split("\n");
+  const sectionOf: string[] = [];
+  let section = "";
+  for (const line of lines) {
+    const h = line.match(/^(#{1,2})\s+(.*)$/);
+    if (h) section = h[1] === "#" ? "" : h[2].replace(/[*_]/g, "").trim().toLowerCase();
+    sectionOf.push(section);
+  }
+  const isSkills = (s: string) => /skill/.test(s);
+  const isTarget = (s: string) => /summary|profile|experience|employment|work history/.test(s);
+
+  const terms = new Set<string>();
+  const addTerm = (raw: string) => {
+    const t = raw.replace(/[*_`]/g, "").replace(/\s+/g, " ").trim().replace(/[.,;:]+$/, "");
+    if (t.length < 2 || t.length > 30 || t.split(" ").length > 4) return;
+    terms.add(t);
+  };
+  lines.forEach((line, i) => {
+    if (!isSkills(sectionOf[i]) || /^#/.test(line)) return;
+    const m = line.replace(/^\s*(?:[-*]|\d+\.)\s+/, "").match(/^([^:]{1,40}):\s*(.+)$/);
+    if (!m || /core strength|soft skill/i.test(m[1])) return;
+    m[2].split(/,|;/).forEach(addTerm);
+  });
+  lines.forEach((line, i) => {
+    if (!isTarget(sectionOf[i]) || /^#/.test(line)) return;
+    for (const b of Array.from(line.matchAll(/\*\*([^*\n]+)\*\*/g))) {
+      // Only reuse AI-bolded terms that look technical (capital, digit or symbol).
+      if (/[A-Z0-9+#./]/.test(b[1])) addTerm(b[1]);
+    }
+  });
+  if (!terms.size) return md;
+
+  const esc = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  // Longest first, so "AWS Lambda" wins over "AWS"; case-sensitive to avoid
+  // bolding ordinary words ("go", "rest").
+  const alt = Array.from(terms).sort((a, b) => b.length - a.length).map(esc).join("|");
+  const termRe = new RegExp(`(?<![A-Za-z0-9])(?:${alt})(?![A-Za-z0-9])`, "g");
+  // Pieces to leave untouched: bold, links, italics, code.
+  const keepRe = /(\*\*[^*\n]+\*\*|\[[^\]]*\]\([^)]*\)|\*[^*\n]+\*|_[^_\n]+_|`[^`\n]+`)/;
+
+  return lines
+    .map((line, i) => {
+      if (!isTarget(sectionOf[i]) || /^#/.test(line) || !line.trim()) return line;
+      return line
+        .split(keepRe)
+        .map((part, j) => (j % 2 === 1 ? part : part.replace(termRe, (t) => `**${t}**`)))
+        .join("");
+    })
+    .join("\n");
+}
+
+/**
  * Contact links the base resume (MD file) doesn't have are removed from the
  * generated contact line, e.g. no GitHub in the MD file -> no GitHub on the resume.
  */
@@ -1493,6 +1567,128 @@ function syncContactLinks(generated: string, base: string): string {
   return cleaned + generated.slice(header.length);
 }
 
+/**
+ * Project links: if the base resume (MD file) has a Projects section with links,
+ * add a short Projects section to the generated resume with just one link line per
+ * project (no bullets), e.g. "- [Brivano.io](https://brivano.io) – Real Estate
+ * Intelligence Platform". A project's link is a Markdown link or URL in its part of
+ * the base resume, or its name when the name is a web address (e.g. "Fieldcall.ai").
+ * Placed before Education (or Languages, or at the end). Nothing changes when the
+ * base resume has no project links or the generated resume already has a Projects section.
+ */
+function syncProjectLinks(generated: string, base: string): string {
+  const PROJ = /projects?/i;
+  const b = findSection(base, PROJ);
+  if (!b || findSection(generated, PROJ)) return generated;
+
+  const DOMAIN = /^(?:www\.)?[a-z0-9-]+(?:\.[a-z0-9-]+)*\.[a-z]{2,}$/i;
+  const linkIn = (text: string): { label: string; url: string } | null => {
+    const md = text.match(/\[([^\]]+)\]\(([^)\s]+)\)/);
+    if (md) return { label: md[1].trim(), url: md[2].trim() };
+    const bare = text.match(/\b(?:https?:\/\/|www\.)[^\s)|,]+/i);
+    if (bare) return { label: bare[0].replace(/^https?:\/\//i, "").replace(/\/$/, ""), url: bare[0] };
+    return null;
+  };
+
+  const lines: string[] = [];
+  const body = base.slice(b[0], b[1]).split("\n").slice(1);
+  // Group the section by "### Project" headings (a section without them is one group).
+  const groups: string[][] = [];
+  for (const line of body) {
+    if (/^###\s+/.test(line) || groups.length === 0) groups.push([]);
+    groups[groups.length - 1].push(line);
+  }
+  for (const g of groups) {
+    const heading = /^###\s+/.test(g[0] ?? "") ? g[0].replace(/^###\s+/, "").replace(/[*_]/g, "").trim() : "";
+    const [name, ...rest] = heading.split(/\s+[–—|-]\s+/);
+    const subtitle = rest.join(" – ").trim();
+    let link = linkIn(g.join("\n"));
+    const plainName = (name ?? "").replace(/\[([^\]]+)\]\([^)]*\)/g, "$1").trim();
+    if (!link && DOMAIN.test(plainName)) link = { label: plainName, url: `https://${plainName.toLowerCase()}` };
+    if (!link) continue;
+    const label = plainName || link.label;
+    lines.push(`- [${label}](${link.url})${subtitle ? ` – ${subtitle}` : ""}`);
+  }
+  if (!lines.length) return generated;
+
+  // Match the generated resume's heading style (e.g. "## EDUCATION" → "## PROJECTS").
+  const h2 = generated.match(/^##\s+(.+)$/gm) ?? [];
+  const upper = h2.length > 0 && h2.every((h) => h.replace(/^##\s+/, "").replace(/[^A-Za-z]/g, "") === h.replace(/^##\s+/, "").replace(/[^A-Za-z]/g, "").toUpperCase());
+  const section = `## ${upper ? "PROJECTS" : "Projects"}\n\n${lines.join("\n")}\n\n`;
+
+  const before = findSection(generated, /education|academic/i) ?? findSection(generated, /^languages?$/i);
+  if (before) return generated.slice(0, before[0]) + section + generated.slice(before[0]);
+  return generated.replace(/\s*$/, "\n\n") + section.trimEnd() + "\n";
+}
+
+/**
+ * Company links: if a job in the base resume (MD file) has a website (e.g. a line
+ * "https://riftn.com/" under "**Riftn** | London, UK"), the same job in the generated
+ * resume gets that link at the end of its "### Title | Dates" line, e.g.
+ * "### Lead Software Engineer | Jan 2021 - Present | [riftn.com](https://riftn.com/)".
+ * Jobs are matched by company name. Jobs without a link stay as generated.
+ */
+function syncCompanyLinks(generated: string, base: string): string {
+  const EXP = /experience|employment|work history/i;
+  const b = findSection(base, EXP);
+  const g = findSection(generated, EXP);
+  if (!b || !g) return generated;
+
+  const URL_RE = /(?:\[[^\]]*\]\()?\b((?:https?:\/\/|www\.)[^\s)|,]+)\)?/i;
+  const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, "");
+  const groupsOf = (lines: string[]) => {
+    const out: { start: number; lines: string[] }[] = [];
+    lines.forEach((line, i) => {
+      if (/^###\s+/.test(line)) out.push({ start: i, lines: [] });
+      if (out.length) out[out.length - 1].lines.push(line);
+    });
+    return out;
+  };
+  // Company name of a job: the bold line under the heading, or "| Company - Location" in it.
+  const companyOf = (job: string[]): string => {
+    for (const l of job.slice(1, 4)) {
+      const m = l.trim().match(/^\*\*([^*]+)\*\*/);
+      if (m) return m[1].trim();
+    }
+    const parts = job[0].replace(/^###\s+/, "").replace(/[*_]/g, "").split("|").map((p) => p.trim());
+    return (parts[1] ?? "").split(/\s+[–—-]\s+/)[0].trim();
+  };
+
+  // Base jobs with a link in their header (heading + the next few lines, before the bullets).
+  const links: { company: string; url: string }[] = [];
+  for (const job of groupsOf(base.slice(b[0], b[1]).split("\n"))) {
+    const header: string[] = [];
+    for (const l of job.lines) {
+      if (/^\s*[-*]\s+/.test(l)) break;
+      header.push(l);
+    }
+    const m = header.join("\n").match(URL_RE);
+    const company = companyOf(job.lines);
+    if (m && norm(company).length >= 2) links.push({ company: norm(company), url: m[1] });
+  }
+  if (!links.length) return generated;
+
+  const lines = generated.slice(g[0], g[1]).split("\n");
+  const drop = new Set<number>();
+  for (const job of groupsOf(lines)) {
+    const company = norm(companyOf(job.lines));
+    const headerText = norm(job.lines.slice(0, 4).join(" "));
+    const hit =
+      links.find((l) => l.company === company) ??
+      links.find((l) => headerText.includes(l.company));
+    if (!hit || URL_RE.test(lines[job.start])) continue;
+    // A link line the AI copied under the heading would show twice: remove it.
+    for (let k = 1; k < Math.min(job.lines.length, 4); k++) {
+      const l = job.lines[k].trim();
+      if (l && l.replace(URL_RE, "").trim() === "") drop.add(job.start + k);
+    }
+    const label = hit.url.replace(/^https?:\/\//i, "").replace(/^www\./i, "").replace(/\/$/, "");
+    lines[job.start] = `${lines[job.start].trimEnd()} | [${label}](${hit.url})`;
+  }
+  const section = lines.filter((_, i) => !drop.has(i)).join("\n");
+  return generated.slice(0, g[0]) + section + generated.slice(g[1]);
+}
+
 function nameFromResume(md: string): string {
   const m = md.match(/^#\s+(.+)$/m);
   if (!m) return "";
@@ -1511,6 +1707,11 @@ export default function Home() {
   const [prompt] = useState(DEFAULT_PROMPT);
   const [resume, setResume] = useState("");
   const [jobDescription, setJobDescription] = useState("");
+  // "Fill from job link": the server reads the posting and fills company, role and JD.
+  const [jobLink, setJobLink] = useState("");
+  const [filling, setFilling] = useState(false);
+  const [fillMsg, setFillMsg] = useState<{ ok: boolean; text: string } | null>(null);
+  const [blockedLink, setBlockedLink] = useState("");
   const [templateId, setTemplateId] = useState<string>(RESUME_TEMPLATES[0].id);
   const template = getTemplate(templateId);
   const [docxStyle, setDocxStyle] =
@@ -1542,23 +1743,11 @@ export default function Home() {
     }
   }, []);
   const [loading, setLoading] = useState(false);
+  const [loadingLabel, setLoadingLabel] = useState("Calling LLM…");
   const [error, setError] = useState<string | null>(null);
   const [savedPath, setSavedPath] = useState<string | null>(null);
-  // Folder on this PC where resumes are saved (Chrome/Edge folder picker).
-  const [saveDir, setSaveDir] = useState<SaveDirHandle | null>(null);
-  const [folderPickerOk, setFolderPickerOk] = useState(false);
-  useEffect(() => {
-    setFolderPickerOk(canPickFolder());
-    getSavedFolder().then((h) => h && setSaveDir(h));
-  }, []);
-  async function chooseSaveFolder() {
-    const h = await pickFolder();
-    if (h) setSaveDir(h);
-  }
-  async function clearSaveFolder() {
-    await forgetFolder();
-    setSaveDir(null);
-  }
+  // The "Save to this PC" folder picker was removed: files always go to the browser's Downloads folder.
+  const saveDir: SaveDirHandle | null = null;
   const [, setLastResponse] = useState<ChatResponse | null>(null);
 
   // Generated resume kept in memory for the Q&A panel until "New Resume".
@@ -1570,6 +1759,35 @@ export default function Home() {
   const [question, setQuestion] = useState("");
   const [qaLoading, setQaLoading] = useState(false);
   const [qaError, setQaError] = useState<string | null>(null);
+
+  // This profile's own application counts (today / yesterday, browser's local days).
+  const [myCounts, setMyCounts] = useState<{ today: number; yesterday: number } | null>(null);
+  const loadMyCounts = useCallback(async () => {
+    try {
+      const res = await fetch("/api/my-stats", { cache: "no-store" });
+      if (!res.ok) return;
+      const data = await res.json();
+      if (!Array.isArray(data?.times)) return;
+      const now = new Date();
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+      const yesterday = today - 24 * 60 * 60 * 1000;
+      let t = 0;
+      let y = 0;
+      for (const iso of data.times as string[]) {
+        const ms = Date.parse(iso);
+        if (ms >= today) t++;
+        else if (ms >= yesterday) y++;
+      }
+      setMyCounts({ today: t, yesterday: y });
+    } catch {
+      /* counts are informational; ignore failures */
+    }
+  }, []);
+  useEffect(() => {
+    loadMyCounts();
+    const timer = setInterval(loadMyCounts, 60000);
+    return () => clearInterval(timer);
+  }, [loadMyCounts]);
 
   // Pre-fill the Resume field from show_resume.txt on the server.
   useEffect(() => {
@@ -1662,6 +1880,11 @@ export default function Home() {
     let buffer = "";
     let content = "";
 
+    // Bullet rules for the first three roles (count, one-line vs two-line): roles that
+    // break them are rewritten by short extra AI requests (not counted), started as
+    // soon as each role is complete so they run alongside the main generation.
+    const fixer = resume.trim() ? new BulletRuleFixer(jobDescription, askChat) : null;
+
     let donePayload: {
       reasoning_details?: unknown;
       role?: string;
@@ -1706,6 +1929,8 @@ export default function Home() {
 
           if (obj.content !== undefined) {
             content += obj.content;
+            // Start checking each finished role's bullets while the rest is written.
+            fixer?.feed(content);
           }
 
           if (obj.done) {
@@ -1718,12 +1943,25 @@ export default function Home() {
         }
       }
 
+      if (fixer && content.trim()) {
+        setLoadingLabel("Checking bullets…");
+        content = await fixer.finish(content);
+      }
+      setLoadingLabel("Saving PDF…");
+
       const data: ChatResponse = {
         // Languages section is copied from the base resume (MD file), and contact
         // links it doesn't have (e.g. GitHub) are removed.
-        content: resume.trim()
-          ? syncContactLinks(syncLanguagesSection(content, resume), resume)
-          : content,
+        // Technical words are made bold in the Summary and Experience.
+        // Project links from the base resume are added as a short Projects section.
+        content: boldTechTerms(
+          resume.trim()
+            ? syncCompanyLinks(
+              syncProjectLinks(syncContactLinks(syncLanguagesSection(content, resume), resume), resume),
+              resume
+            )
+            : content
+        ),
         ...donePayload,
       };
 
@@ -1749,6 +1987,8 @@ export default function Home() {
       // Clear company/role so the next run starts fresh.
       setCompany("");
       setRole("");
+      setJobLink("");
+      setFillMsg(null);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Stream read failed");
     }
@@ -1795,6 +2035,7 @@ export default function Home() {
     if (saveDir && (await ensureWriteAccess(saveDir))) writableDir = saveDir;
 
     setLoading(true);
+    setLoadingLabel("Calling LLM…");
 
     const nameBase =
       personName
@@ -1832,6 +2073,7 @@ export default function Home() {
         template.render,
         writableDir
       );
+      loadMyCounts(); // the server counted this resume
     } catch (err) {
       setError(err instanceof Error ? err.message : "Request failed");
     } finally {
@@ -1952,6 +2194,54 @@ export default function Home() {
     setCompany("");
     setRole("");
     setJobDescription("");
+    setJobLink("");
+    setFillMsg(null);
+  }
+
+  async function handleFillFromLink() {
+    const url = jobLink.trim();
+    const pasted = jobDescription.trim();
+    if ((!url && !pasted) || filling) return;
+    setFilling(true);
+    setFillMsg(null);
+    const post = (payload: { url: string; text?: string }) =>
+      fetch("/api/job-link", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      }).then(async (res) => ({ res, data: await res.json().catch(() => ({})) }));
+    try {
+      // Read the link, unless it's empty or that site already refused automatic reading:
+      // then analyze the page text the candidate pasted into the job description box.
+      const useText = !url || (url === blockedLink && pasted.length > 0);
+      let { res, data } = await post(useText ? { url, text: pasted } : { url });
+      if (!res.ok && data.blocked) {
+        setBlockedLink(url);
+        if (pasted.length > 0) ({ res, data } = await post({ url, text: pasted }));
+      }
+      if (!res.ok) {
+        setFillMsg({
+          ok: false,
+          text: data.blocked
+            ? `${data.error} Click Open ↗, then on the job page press Ctrl+A and Ctrl+C, paste it into Job description below and click Fill again.`
+            : data.error ?? `Could not read the link (${res.status})`,
+        });
+        return;
+      }
+      const missing: string[] = [];
+      if (data.company) setCompany(data.company); else missing.push("company name");
+      if (data.role) setRole(data.role); else missing.push("job role");
+      if (data.jobDescription) setJobDescription(data.jobDescription); else missing.push("job description");
+      setFillMsg(
+        missing.length
+          ? { ok: false, text: `Filled what was found. Not found: ${missing.join(", ")}. Please type it in.` }
+          : { ok: true, text: "Filled. Check the fields before generating." }
+      );
+    } catch {
+      setFillMsg({ ok: false, text: "Could not reach the server. Try again." });
+    } finally {
+      setFilling(false);
+    }
   }
 
   return (
@@ -2022,14 +2312,29 @@ export default function Home() {
         </button>
       </h1>
 
-      <p
-        style={{
-          color: "var(--muted)",
-          marginBottom: "1.5rem",
-        }}
-      >
-       
-      </p>
+      {/* Your applications: today / yesterday */}
+      <div style={{ display: "flex", gap: "0.75rem", margin: "0.75rem 0 1.5rem" }}>
+        {([
+          ["Today", myCounts?.today],
+          ["Yesterday", myCounts?.yesterday],
+        ] as const).map(([label, value]) => (
+          <div
+            key={label}
+            style={{
+              flex: 1,
+              background: "var(--surface)",
+              border: "1px solid var(--border, #2c2c34)",
+              borderRadius: 10,
+              padding: "0.65rem 0.9rem",
+            }}
+          >
+            <div style={{ color: "var(--muted)", fontSize: "0.8rem" }}>{label}</div>
+            <div style={{ fontSize: "1.6rem", fontWeight: 700, fontVariantNumeric: "tabular-nums", lineHeight: 1.2 }}>
+              {value ?? "–"}
+            </div>
+          </div>
+        ))}
+      </div>
 
       <form onSubmit={handleSubmit} noValidate>
 
@@ -2053,6 +2358,86 @@ export default function Home() {
             style={inputStyle}
           />
         </label>
+
+        <div style={{ marginBottom: "1rem" }}>
+          <label htmlFor="job-link" style={{ display: "block", marginBottom: "0.25rem", fontWeight: 500 }}>
+            Job link <span style={{ color: "var(--muted)", fontWeight: 400 }}>(optional)</span>
+          </label>
+          <div style={{ display: "flex", gap: "0.5rem" }}>
+            <input
+              id="job-link"
+              type="url"
+              value={jobLink}
+              onChange={(e) => setJobLink(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  handleFillFromLink();
+                }
+              }}
+              placeholder="Paste the job posting link, then click Fill"
+              disabled={loading || filling}
+              style={{ ...inputStyle, flex: 1, minWidth: 0 }}
+            />
+            <button
+              type="button"
+              onClick={handleFillFromLink}
+              disabled={loading || filling || (!jobLink.trim() && !jobDescription.trim())}
+              style={{
+                padding: "0.6rem 1.25rem",
+                background: loading || filling || (!jobLink.trim() && !jobDescription.trim()) ? "var(--border)" : "var(--accent)",
+                color: "white",
+                border: "none",
+                borderRadius: "8px",
+                fontWeight: 500,
+                whiteSpace: "nowrap",
+                cursor: loading || filling || (!jobLink.trim() && !jobDescription.trim()) ? "default" : "pointer",
+              }}
+            >
+              {filling ? "Reading…" : "Fill"}
+            </button>
+            <button
+              type="button"
+              title="Open the job page in a new browser tab"
+              onClick={() => {
+                let url = jobLink.trim();
+                if (!/^https?:\/\//i.test(url)) url = "https://" + url;
+                try {
+                  const u = new URL(url);
+                  if (u.protocol !== "http:" && u.protocol !== "https:") throw new Error();
+                  window.open(u.toString(), "_blank", "noopener,noreferrer");
+                } catch {
+                  setFillMsg({ ok: false, text: "That doesn't look like a link." });
+                }
+              }}
+              disabled={!jobLink.trim()}
+              style={{
+                padding: "0.6rem 1.1rem",
+                background: "transparent",
+                color: jobLink.trim() ? "var(--text)" : "var(--muted)",
+                border: "1px solid var(--border)",
+                borderRadius: "8px",
+                fontWeight: 500,
+                whiteSpace: "nowrap",
+                cursor: jobLink.trim() ? "pointer" : "default",
+              }}
+            >
+              Open ↗
+            </button>
+          </div>
+          {fillMsg && (
+            <p
+              role="status"
+              style={{
+                margin: "0.35rem 0 0",
+                fontSize: "0.85rem",
+                color: fillMsg.ok ? "var(--muted)" : "#e66767",
+              }}
+            >
+              {fillMsg.text}
+            </p>
+          )}
+        </div>
 
         <div
           style={{
@@ -2120,7 +2505,7 @@ export default function Home() {
         <textarea
           value={jobDescription}
           onChange={(e) => setJobDescription(e.target.value)}
-          placeholder="Paste job description here..."
+          placeholder="Paste job description here... (or paste the whole job page and click Fill to sort it out)"
           disabled={loading}
           style={{ ...textareaStyle, minHeight: "140px" }}
         />
@@ -2583,42 +2968,6 @@ export default function Home() {
           </div>
         </details>
 
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "0.6rem",
-            flexWrap: "wrap",
-            margin: "0.75rem 0",
-            padding: "0.6rem 0.8rem",
-            border: "1px solid var(--border)",
-            borderRadius: "8px",
-            background: "var(--surface)",
-            fontSize: "0.9rem",
-          }}
-        >
-          <span style={{ fontWeight: 500 }}>Save to this PC:</span>
-          {folderPickerOk ? (
-            <>
-              <span style={{ color: saveDir ? "var(--text)" : "var(--muted)" }}>
-                {saveDir ? `📁 ${saveDir.name}\\${personName.trim() || "<name>"}\\<Company_Role>` : "Downloads folder (no folder chosen)"}
-              </span>
-              <button type="button" onClick={chooseSaveFolder} disabled={loading} style={smallButtonStyle}>
-                {saveDir ? "Change folder" : "Choose folder"}
-              </button>
-              {saveDir && (
-                <button type="button" onClick={clearSaveFolder} disabled={loading} style={smallButtonStyle}>
-                  Use Downloads
-                </button>
-              )}
-            </>
-          ) : (
-            <span style={{ color: "var(--muted)" }}>
-              Downloads folder. To pick a folder (e.g. {"D:\\Resume"}), open this page in Chrome or Edge over https:// or localhost.
-            </span>
-          )}
-        </div>
-
         <button
           type="submit"
           disabled={
@@ -2637,7 +2986,7 @@ export default function Home() {
             fontWeight: 500,
           }}
         >
-          {loading ? "Calling LLM…" : "Generate & save PDF"}
+          {loading ? loadingLabel : "Generate & save PDF"}
         </button>
       </form>
 

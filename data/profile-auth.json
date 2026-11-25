@@ -7,9 +7,9 @@
   },
   "smaylle": {
     "user": "Smaylle",
-    "salt": "e7fabde0aa02ed5bed44c7b623901204",
-    "hash": "c81d262f34416cce7eaa614920d80bc9c5a49c48fba064afc71ad82176c24325",
-    "updated": "2026-11-16T06:54:14.555Z"
+    "salt": "dae8c0273e93fa43ed9bc43db77808bf",
+    "hash": "8f9ef79a70c799674b60b5dfb4a34789fc94fa0a4361f5f42d773d954379a2ee",
+    "updated": "2026-11-16T09:04:05.703Z"
   },
   "marcin_pham": {
     "user": "Marcin",
@@ -22,5 +22,23 @@
     "salt": "0ca330823a66796a71f28307c1519dfb",
     "hash": "ba18566f8f4ffe5e8667b04d53c1ae1aaf7a39834d1ad606763813d23d16e335",
     "updated": "2026-11-16T07:04:36.855Z"
+  },
+  "james": {
+    "user": "James",
+    "salt": "c1da47c60439f5f78b213835b1719004",
+    "hash": "262ca9713c70f05a93023fdc4079fd9682cb4bb9a3828adfc880b8f132fc83d2",
+    "updated": "2026-11-16T15:33:28.480Z"
+  },
+  "mal": {
+    "user": "Mal",
+    "salt": "a1bb6f39b4f148c4ec35fbc5c7750103",
+    "hash": "21e1df692129d168a5c5efbc528d3f61f5f8850dbd9d6c10a20ae37bbe6b0b03",
+    "updated": "2026-11-17T12:50:18.362Z"
+  },
+  "elis": {
+    "user": "Elis",
+    "salt": "a5520c6ae6a5060112dec95ba0230861",
+    "hash": "e8348d30792f32925cd334c8bb327738158f80452ad0086f64c16180b8aa3725",
+    "updated": "2026-11-23T19:42:22.330Z"
   }
 }

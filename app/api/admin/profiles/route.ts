@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { isAdmin } from "@/lib/admin-auth";
+import { adminRole, forbidden, isSuperAdmin } from "@/lib/admin-auth";
 import { listProfileLogins, setProfileLogin } from "@/lib/profile-auth";
 import { activeIds, archivedIds, displayName, readResume } from "@/lib/profiles";
 
@@ -9,7 +9,9 @@ const unauthorized = () => NextResponse.json({ error: "Wrong admin password" }, 
 
 /** GET (admin): active + archived profiles with their login username. */
 export async function GET(request: NextRequest) {
-  if (!isAdmin(request)) return unauthorized();
+  const role = adminRole(request);
+  if (!role) return unauthorized();
+  const showLogins = role === "super"; // general admins don't see usernames
   const [logins, active, archived] = await Promise.all([
     listProfileLogins(),
     activeIds(),
@@ -21,8 +23,8 @@ export async function GET(request: NextRequest) {
       id,
       name: displayName(md, id),
       archived: isArchived,
-      user: logins[id]?.user ?? null,
-      updated: logins[id]?.updated ?? null,
+      user: showLogins ? logins[id]?.user ?? null : null,
+      updated: showLogins ? logins[id]?.updated ?? null : null,
     };
   };
   const profiles = await Promise.all([
@@ -32,9 +34,9 @@ export async function GET(request: NextRequest) {
   return NextResponse.json({ profiles });
 }
 
-/** PUT (admin): { profile, username, password } sets that profile's login. */
+/** PUT (super admin): { profile, username, password } sets that profile's login. */
 export async function PUT(request: NextRequest) {
-  if (!isAdmin(request)) return unauthorized();
+  if (!isSuperAdmin(request)) return forbidden(request);
   let body: { profile?: unknown; username?: unknown; password?: unknown };
   try {
     body = await request.json();

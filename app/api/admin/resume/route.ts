@@ -1,14 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
-import { isAdmin } from "@/lib/admin-auth";
+import { forbidden, isSuperAdmin } from "@/lib/admin-auth";
 import { isValidId, readResume, writeResume } from "@/lib/profiles";
 
 export const dynamic = "force-dynamic";
 
-const unauthorized = () => NextResponse.json({ error: "Wrong admin password" }, { status: 401 });
 
 /** GET (admin) ?profile=<id>: the profile's .md. */
 export async function GET(request: NextRequest) {
-  if (!isAdmin(request)) return unauthorized();
+  if (!isSuperAdmin(request)) return forbidden(request);
   const id = request.nextUrl.searchParams.get("profile") ?? "";
   if (!isValidId(id)) return NextResponse.json({ error: "Invalid profile id" }, { status: 400 });
   const markdown = await readResume(id);
@@ -22,7 +21,7 @@ export async function GET(request: NextRequest) {
  * create=false updates an existing one (used on the next generation, no restart).
  */
 export async function PUT(request: NextRequest) {
-  if (!isAdmin(request)) return unauthorized();
+  if (!isSuperAdmin(request)) return forbidden(request);
   let body: { profile?: unknown; markdown?: unknown; create?: unknown };
   try {
     body = await request.json();

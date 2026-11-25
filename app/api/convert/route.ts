@@ -46,26 +46,55 @@ function findSoffice(): string | null {
 }
 
 /**
- * Convert with LibreOffice (headless). Each call gets its own temporary
- * profile so several conversions can run at once without locking each other.
+ * LibreOffice profiles are reused: creating a fresh one costs about 1.3 s per PDF.
+ * A small pool lets several conversions run at once (two LibreOffice processes
+ * can't share one profile). The profiles hold only LibreOffice settings, no resumes.
  */
+const LO_POOL_SIZE = 3;
+const loFree: number[] = Array.from({ length: LO_POOL_SIZE }, (_, i) => i);
+const loWaiting: ((slot: number) => void)[] = [];
+
+function acquireLoProfile(): Promise<number> {
+  // Most recently used first: that profile is already set up.
+  const slot = loFree.pop();
+  if (slot !== undefined) return Promise.resolve(slot);
+  return new Promise((resolve) => loWaiting.push(resolve));
+}
+
+function releaseLoProfile(slot: number) {
+  const next = loWaiting.shift();
+  if (next) next(slot);
+  else loFree.push(slot);
+}
+
+/** Convert with LibreOffice (headless), using a profile from the pool. */
 async function convertWithLibreOffice(soffice: string, docxPath: string, dir: string): Promise<void> {
-  const profileUrl = "file:///" + path.join(dir, "lo-profile").replace(/\\/g, "/").replace(/^\/+/, "");
-  await execFileAsync(
-    soffice,
-    [
-      `-env:UserInstallation=${profileUrl}`,
-      "--headless",
-      "--norestore",
-      "--nolockcheck",
-      "--convert-to",
-      "pdf",
-      "--outdir",
-      dir,
-      docxPath,
-    ],
-    { timeout: 120000, windowsHide: true }
-  );
+  const slot = await acquireLoProfile();
+  const profileDir = path.join(os.tmpdir(), `resume-tailor-lo-profile-${slot}`);
+  const profileUrl = "file:///" + profileDir.replace(/\\/g, "/").replace(/^\/+/, "");
+  try {
+    await execFileAsync(
+      soffice,
+      [
+        `-env:UserInstallation=${profileUrl}`,
+        "--headless",
+        "--norestore",
+        "--nolockcheck",
+        "--convert-to",
+        "pdf",
+        "--outdir",
+        dir,
+        docxPath,
+      ],
+      { timeout: 120000, windowsHide: true }
+    );
+  } catch (err) {
+    // A broken profile would fail every time: start the next one fresh.
+    await fs.rm(profileDir, { recursive: true, force: true }).catch(() => {});
+    throw err;
+  } finally {
+    releaseLoProfile(slot);
+  }
 }
 
 /** Whether MS Word is registered on this machine (checked once). */
