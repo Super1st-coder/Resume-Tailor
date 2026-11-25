@@ -71,6 +71,25 @@ export async function writeResume(id: string, markdown: string, create: boolean)
   await fs.rename(tmp, file);
 }
 
+/** Where deleted profiles' resumes are moved (not listed anywhere; kept for manual recovery). */
+export const deletedDir = () => path.join(resumesDir(), "_deleted");
+
+/**
+ * Delete a profile (active or archived): its resume file is moved to
+ * resumes/_deleted/<id>-<time>.md, so the id is free again. The caller removes the login.
+ */
+export async function deleteResume(id: string): Promise<void> {
+  const sources = [fileFor(id), fileFor(id, true)];
+  const found: string[] = [];
+  for (const f of sources) if (await exists(f)) found.push(f);
+  if (found.length === 0) throw new Error("Profile not found");
+  await fs.mkdir(deletedDir(), { recursive: true });
+  const stamp = new Date().toISOString().replace(/[:.]/g, "-");
+  for (let i = 0; i < found.length; i++) {
+    await fs.rename(found[i], path.join(deletedDir(), `${id}-${stamp}${i ? `-${i}` : ""}.md`));
+  }
+}
+
 /** Archive (stop the server, keep the file and history) or restore a profile. */
 export async function setArchived(id: string, archived: boolean): Promise<void> {
   const from = fileFor(id, !archived);

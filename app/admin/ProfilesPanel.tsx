@@ -230,6 +230,30 @@ export default function ProfilesPanel({ adminKey, profiles, reload }: Props) {
     }
   }
 
+  async function remove(p: AdminProfile) {
+    const typed = prompt(
+      `Delete ${p.name} permanently?\n\n` +
+        "They can no longer sign in, and the profile and its login are removed. " +
+        "Past applications stay in the history and counts.\n\n" +
+        `To confirm, type the profile id: ${p.id}`
+    );
+    if (typed === null) return;
+    if (typed.trim() !== p.id) {
+      setMsg({ text: "Not deleted: the id you typed doesn't match.", color: errColor });
+      return;
+    }
+    setBusy("delete");
+    try {
+      await api(adminKey, "/api/admin/resume/delete", "POST", { profile: p.id });
+      setSelected(null);
+      await reload();
+    } catch (err) {
+      setMsg({ text: err instanceof Error ? err.message : "Delete failed", color: errColor });
+    } finally {
+      setBusy("");
+    }
+  }
+
   const status = (p: AdminProfile) =>
     p.archived ? (
       <span style={{ color: "var(--muted)" }}>Archived</span>
@@ -248,7 +272,7 @@ export default function ProfilesPanel({ adminKey, profiles, reload }: Props) {
         </button>
       </div>
       <p style={{ color: "var(--muted)", fontSize: "0.9rem", marginBottom: "0.75rem" }}>
-        Everyone signs in at <a href={siteUrl()} target="_blank" rel="noreferrer">{siteUrl().replace(/^https?:\/\//, "")}</a>; the username decides which profile&apos;s Resume Tailor they see. Click a profile to edit its resume, change its login or archive it.
+        Everyone signs in at <a href={siteUrl()} target="_blank" rel="noreferrer">{siteUrl().replace(/^https?:\/\//, "")}</a>; the username decides which profile&apos;s Resume Tailor they see. Click a profile to edit its resume, change its login, archive it or delete it.
       </p>
 
       {/* ---- Add profile ---- */}
@@ -380,6 +404,13 @@ export default function ProfilesPanel({ adminKey, profiles, reload }: Props) {
                 Archive profile
               </button>
             )}
+            <button
+              style={{ ...button, background: errColor, borderColor: errColor }}
+              disabled={busy !== ""}
+              onClick={() => remove(sel)}
+            >
+              {busy === "delete" ? "Deleting…" : "Delete profile"}
+            </button>
           </div>
           {msg && <p style={{ color: msg.color }}>{msg.text}</p>}
 

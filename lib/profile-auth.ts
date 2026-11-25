@@ -54,6 +54,14 @@ export async function setProfileLogin(profile: string, user: string, password: s
   await writeStore(store);
 }
 
+/** Remove a profile's login (used when the profile is deleted). */
+export async function removeProfileLogin(profile: string): Promise<void> {
+  const store = await readStore();
+  if (!(profile in store)) return;
+  delete store[profile];
+  await writeStore(store);
+}
+
 /** Usernames and last-change times per profile (never the passwords). */
 export async function listProfileLogins(): Promise<Record<string, { user: string; updated: string }>> {
   const store = await readStore();
