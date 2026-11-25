@@ -54,7 +54,7 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  let body: { message?: string; generatedFileName?: string; company?: unknown; role?: unknown };
+  let body: { message?: string; generatedFileName?: string; company?: unknown; role?: unknown; link?: unknown };
   try {
     body = await request.json();
   } catch {
@@ -134,6 +134,7 @@ export async function POST(request: NextRequest) {
                 company: body.company,
                 role: body.role,
                 filename: generatedFileName.replace(/\.docx$/i, ".pdf"),
+                link: body.link,
                 ip: clientIp,
               }).catch((e) => console.error("[applications] record failed:", e));
             }

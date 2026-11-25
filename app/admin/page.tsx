@@ -13,8 +13,12 @@ type Application = {
   role: string;
   filename: string;
   ip: string;
+  link?: string;
 };
 type Profile = AdminProfile;
+
+/** Only http(s) links are made clickable. */
+const safeLink = (s?: string) => (s && /^https?:\/\//i.test(s) ? s : "");
 type ImportItem = { company: string; role: string; filename: string; time: string };
 
 /**
@@ -245,7 +249,7 @@ export default function AdminPage() {
     return (apps ?? []).filter(
       (a) =>
         (!filterProfile || a.profile === filterProfile) &&
-        (!q || `${a.company} ${a.role} ${a.ip} ${a.filename}`.toLowerCase().includes(q))
+        (!q || `${a.company} ${a.role} ${a.ip} ${a.filename} ${a.link ?? ""}`.toLowerCase().includes(q))
     );
   }, [apps, filterProfile, filterText]);
 
@@ -288,10 +292,10 @@ export default function AdminPage() {
     const names = Object.fromEntries(allProfiles.map((p) => [p.id, p.name]));
     const esc = (s: string) => `"${s.replace(/"/g, '""')}"`;
     const rows = [
-      ["Date", "Time", "Profile", "Company", "Role", "IP", "File"],
+      ["Date", "Time", "Profile", "Company", "Role", "IP", "File", "Job link"],
       ...filtered.map((a) => {
         const d = new Date(a.time);
-        return [dayKey(d), d.toLocaleTimeString(), names[a.profile] ?? a.profile, a.company, a.role, a.ip, a.filename];
+        return [dayKey(d), d.toLocaleTimeString(), names[a.profile] ?? a.profile, a.company, a.role, a.ip, a.filename, a.link ?? ""];
       }),
     ];
     const blob = new Blob([rows.map((r) => r.map(esc).join(",")).join("\r\n")], { type: "text/csv" });
@@ -631,6 +635,7 @@ export default function AdminPage() {
                   <th style={th}>Profile</th>
                   <th style={th}>Company</th>
                   <th style={th}>Role</th>
+                  <th style={th}>Job link</th>
                   <th style={th}>IP</th>
                 </tr>
               </thead>
@@ -641,6 +646,15 @@ export default function AdminPage() {
                     <td style={td}>{names[a.profile] ?? a.profile}</td>
                     <td style={{ ...td, whiteSpace: "normal" }}>{a.company || "—"}</td>
                     <td style={{ ...td, whiteSpace: "normal" }}>{a.role || "—"}</td>
+                    <td style={td}>
+                      {safeLink(a.link) ? (
+                        <a href={safeLink(a.link)} target="_blank" rel="noopener noreferrer" title={a.link}>
+                          Open ↗
+                        </a>
+                      ) : (
+                        <span style={{ color: "var(--muted)" }}>—</span>
+                      )}
+                    </td>
                     <td style={{ ...td, color: "var(--muted)" }}>{a.ip}</td>
                   </tr>
                 ))}

@@ -20,9 +20,22 @@ export type Application = {
   role: string;
   filename: string;
   ip: string;
+  /** Job posting link the resume was generated from (only when a link was used). */
+  link?: string;
   /** "import" when added from past resume files on the admin page. */
   source?: string;
 };
+
+/** The job link if it is a valid http(s) URL, else "" (never store javascript: etc.). */
+function cleanLink(input: unknown): string {
+  if (typeof input !== "string" || !input.trim()) return "";
+  try {
+    const u = new URL(input.trim());
+    return u.protocol === "http:" || u.protocol === "https:" ? u.toString().slice(0, 2000) : "";
+  } catch {
+    return "";
+  }
+}
 
 function dataFile(): string {
   return process.env.APPLICATIONS_FILE || path.join(process.cwd(), "data", "applications.jsonl");
@@ -35,8 +48,10 @@ export async function recordApplication(input: {
   company?: unknown;
   role?: unknown;
   filename?: unknown;
+  link?: unknown;
   ip: string;
 }): Promise<Application> {
+  const link = cleanLink(input.link);
   const entry: Application = {
     id: randomUUID(),
     time: new Date().toISOString(),
@@ -45,6 +60,7 @@ export async function recordApplication(input: {
     role: clip(input.role, 200),
     filename: clip(input.filename, 300),
     ip: clip(input.ip, 100),
+    ...(link ? { link } : {}),
   };
   const file = dataFile();
   await fs.mkdir(path.dirname(file), { recursive: true });

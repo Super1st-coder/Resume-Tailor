@@ -2058,6 +2058,8 @@ export default function Home() {
           // Used by the server to count this resume on the admin page.
           company: company.trim(),
           role: role.trim(),
+          // Saved with the application on the admin page when a job link was used.
+          link: jobLink.trim() || undefined,
         }),
       });
 
